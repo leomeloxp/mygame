@@ -6,20 +6,37 @@ BasicGame.Game.prototype = {
     /* Creates the game objects (ideally with already loaded assets) */
     create: function () {
         // Phase One:
+      this.setupBackground();
+        this.setupPlayer();
+this.setupEnemies();
+// Implement keyboard control with arrow keys
+this.cursors = this.input.keyboard.createCursorKeys();
+this.setupBullets();
+this.setupExplosions();
+this.setupPlayerIcons();
+this.setupText();
         //Phase Two:
+        this.setupBoss();
+        this.setupAudio();
     },
 
     update: function () {
         // Phase One:
+        this.processPlayerInput();
+this.spawnEnemies();
+this.checkCollisions();
+this.enemyFire();
+this.processDelayedEffects(); 
         //Phase Two
+        this.bossFire();
     },
 
 
     render: function () {
         // Enable collision range display for debugging
-        //this.game.debug.body(this.bullet);
-        //this.game.debug.body(this.enemy);
-        //this.game.debug.body(this.player);
+//        this.game.debug.body(this.bullet);
+//        this.game.debug.body(this.enemy);
+//        this.game.debug.body(this.player);
 
     },
 
@@ -340,7 +357,7 @@ BasicGame.Game.prototype = {
                     bullet, this.player, BasicGame.ENEMY_BULLET_VELOCITY
                 );
                 enemy.nextShotAt = this.time.now + BasicGame.SHOOTER_SHOT_DELAY;
-                // this.enemyFireSFX.play();
+                this.enemyFireSFX.play();
             }
         }, this);
     },
@@ -352,7 +369,7 @@ BasicGame.Game.prototype = {
 
             this.boss.nextShotAt = this.time.now + BasicGame.BOSS_SHOT_DELAY;
 
-            // this.enemyFireSFX.play();
+            this.enemyFireSFX.play();
 
 
             for (var i = 0; i < 5; i++) {
@@ -410,7 +427,7 @@ BasicGame.Game.prototype = {
             this.physics.arcade.moveToPointer(this.player, this.player.speed);
         }
 
-        if ((this.input.keyboard.isDown(Phaser.Keyboard.Z) ||
+        if ((this.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR) ||
             this.input.activePointer.isDown) || 
             (this.input.keyboard.isDown(Phaser.Keyboard.K))) {
             if (this.returnText && this.returnText.exists) {
@@ -441,17 +458,17 @@ BasicGame.Game.prototype = {
             this.showReturn = false;
         }
 
-        // if (this.bossApproaching && this.boss.y > 80) {
-        //     this.bossApproaching = false;
-        //     this.boss.nextShotAt = 0;
+         if (this.bossApproaching && this.boss.y > 80) {
+             this.bossApproaching = false;
+             this.boss.nextShotAt = 0;
 
-        //     this.boss.body.velocity.y = 0;
-        //     this.boss.body.velocity.x = BasicGame.BOSS_X_VELOCITY;
+             this.boss.body.velocity.y = 0;
+             this.boss.body.velocity.x = BasicGame.BOSS_X_VELOCITY;
 
-        //     // Allow bouncing off world bounds
-        //     this.boss.body.bounce.x = 1;
-        //     this.boss.body.collideWorldBounds = true;
-        // };
+             // Allow bouncing off world bounds
+             this.boss.body.bounce.x = 1;
+             this.boss.body.collideWorldBounds = true;
+         };
     },
 
     //
@@ -471,7 +488,7 @@ BasicGame.Game.prototype = {
             return;
         }
 
-        // this.playerExplosionSFX.play();
+         this.playerExplosionSFX.play();
 
         // Crashing into an enemy only deals 5 damage
         this.damageEnemy(enemy, BasicGame.CRASH_DAMAGE);
@@ -495,7 +512,7 @@ BasicGame.Game.prototype = {
             enemy.play('hit');
         } else {
             this.explode(enemy);
-            // this.explosionSFX.play();
+             this.explosionSFX.play();
             this.spawnPowerUp(enemy);
             this.addToScore(enemy.reward);
             // We check the sprite key (e.g. 'greenEnemy') to see if the sprite is a boss
@@ -525,7 +542,7 @@ BasicGame.Game.prototype = {
     playerPowerUp: function (player, powerUp) {
         this.addToScore(powerUp.reward);
         powerUp.kill();
-        // this.powerUpSFX.play();
+         this.powerUpSFX.play();
         if (this.weaponLevel < 5) {
             this.weaponLevel++;
         }
@@ -534,9 +551,9 @@ BasicGame.Game.prototype = {
     addToScore: function (score) {
         this.score += score;
         this.scoreText.text = this.score;
-        // if (this.score >= BasicGame.BOSS_TRIGGER_SCORE && this.bossPool.countDead() == 1) {
-        //     this.spawnBoss();
-        // }
+         if (this.score >= BasicGame.BOSS_TRIGGER_SCORE && this.bossPool.countDead() == 1) {
+             this.spawnBoss();
+         }
     },
 
     // Manage player's bullets being fired
@@ -546,7 +563,7 @@ BasicGame.Game.prototype = {
         }
 
         this.nextShotAt = this.time.now + this.shotDelay;
-        // this.playerFireSFX.play();
+         this.playerFireSFX.play();
 
         var bullet;
         if (this.weaponLevel === 0) {
@@ -619,7 +636,7 @@ BasicGame.Game.prototype = {
         this.shooterPool.destroy();
         this.enemyBulletPool.destroy();
         this.powerUpPool.destroy();
-        this.bossPool.destroy();
+        //this.bossPool.destroy();
         this.instructions.destroy();
         this.scoreText.destroy();
         this.endText.destroy();
